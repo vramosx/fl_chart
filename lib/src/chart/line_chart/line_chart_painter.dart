@@ -309,7 +309,7 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
   /// and a completely filled path will return,
   Path _generateBelowBarPath(Size viewSize, LineChartBarData barData, Path barPath,
       {bool fillCompletely = false}) {
-    final belowBarPath = Path.from(barPath);
+    final belowBarPath = kIsWeb ? barPath.shift(const Offset(0, 0)) : Path.from(barPath);
 
     final chartViewSize = getChartUsableDrawSize(viewSize);
 
