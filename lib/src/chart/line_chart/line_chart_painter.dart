@@ -1,5 +1,5 @@
 import 'dart:ui' as ui;
-
+import 'package:flutter/foundation.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:fl_chart/src/chart/base/axis_chart/axis_chart_data.dart';
 import 'package:fl_chart/src/chart/base/axis_chart/axis_chart_painter.dart';
@@ -146,7 +146,7 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
   void drawBarLine(Canvas canvas, Size viewSize, LineChartBarData barData) {
     final barPath = _generateBarPath(viewSize, barData);
 
-    final belowBarPath = _generateBelowBarPath(viewSize, barData, barPath);
+    final belowBarPath = kIsWeb ? barPath.shift(const Offset(0, 0)) : Path.from(barPath);
     final completelyFillBelowBarPath =
         _generateBelowBarPath(viewSize, barData, barPath, fillCompletely: true);
 
@@ -796,7 +796,7 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
 
         final double rightChartPadding = getExtraNeededHorizontalSpace() - getLeftOffsetDrawSize();
         final Offset to =
-        Offset(viewSize.width - rightChartPadding, getPixelY(line.y, chartUsableSize));
+            Offset(viewSize.width - rightChartPadding, getPixelY(line.y, chartUsableSize));
 
         extraLinesPaint.color = line.color;
         extraLinesPaint.strokeWidth = line.strokeWidth;
@@ -812,7 +812,7 @@ class LineChartPainter extends AxisChartPainter<LineChartData>
 
         final double bottomChartPadding = getExtraNeededVerticalSpace() - getTopOffsetDrawSize();
         final Offset to =
-        Offset(getPixelX(line.x, chartUsableSize), viewSize.height - bottomChartPadding);
+            Offset(getPixelX(line.x, chartUsableSize), viewSize.height - bottomChartPadding);
 
         extraLinesPaint.color = line.color;
         extraLinesPaint.strokeWidth = line.strokeWidth;
