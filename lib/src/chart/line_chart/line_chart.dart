@@ -36,6 +36,11 @@ class LineChartState extends AnimatedWidgetBaseState<LineChart> {
 
   final Map<int, List<int>> _showingTouchedIndicators = {};
 
+  Offset _globalToLocal(BuildContext context, Offset globalPosition) {
+    final RenderBox box = context.findRenderObject();
+    return box.globalToLocal(globalPosition);
+  }
+
   @override
   Widget build(BuildContext context) {
     final LineChartData showingData = _getDate();
@@ -49,8 +54,10 @@ class LineChartState extends AnimatedWidgetBaseState<LineChart> {
               return;
             }
 
+            final localPosition = _globalToLocal(context, d.position);
+
             final LineTouchResponse response =
-                _touchHandler?.handleTouch(FlLongPressStart(d.localPosition), chartSize);
+                _touchHandler?.handleTouch(FlLongPressStart(localPosition), chartSize);
             if (_canHandleTouch(response, touchData)) {
               touchData.touchCallback(response);
             }
@@ -61,8 +68,10 @@ class LineChartState extends AnimatedWidgetBaseState<LineChart> {
               return;
             }
 
+            final localPosition = _globalToLocal(context, d.position);
+
             final LineTouchResponse response =
-                _touchHandler?.handleTouch(FlLongPressMoveUpdate(d.localPosition), chartSize);
+                _touchHandler?.handleTouch(FlLongPressMoveUpdate(localPosition), chartSize);
             if (_canHandleTouch(response, touchData)) {
               touchData.touchCallback(response);
             }
@@ -73,8 +82,10 @@ class LineChartState extends AnimatedWidgetBaseState<LineChart> {
               return;
             }
 
+            final localPosition = _globalToLocal(context, d.position);
+
             final LineTouchResponse response =
-                _touchHandler?.handleTouch(FlLongPressEnd(d.localPosition), chartSize);
+                _touchHandler?.handleTouch(FlLongPressEnd(localPosition), chartSize);
             if (_canHandleTouch(response, touchData)) {
               touchData.touchCallback(response);
             }
