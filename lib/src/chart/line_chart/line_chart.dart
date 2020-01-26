@@ -3,6 +3,7 @@ import 'package:fl_chart/src/chart/base/base_chart/base_chart_painter.dart';
 import 'package:fl_chart/src/chart/base/base_chart/touch_input.dart';
 import 'package:fl_chart/src/utils/utils.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
 import 'line_chart_data.dart';
 import 'line_chart_painter.dart';
@@ -46,7 +47,7 @@ class LineChartState extends AnimatedWidgetBaseState<LineChart> {
     final LineChartData showingData = _getDate();
     final LineTouchData touchData = showingData.lineTouchData;
 
-    if (widget.useCursor) {
+    if (widget.useCursor && kIsWeb) {
       return MouseRegion(
           onEnter: (d) {
             final Size chartSize = _getChartSize();
