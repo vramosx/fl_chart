@@ -9,9 +9,13 @@ import 'line_chart_painter.dart';
 
 class LineChart extends ImplicitlyAnimatedWidget {
   final LineChartData data;
+  final bool useCursor;
+  final Function onRelease;
 
   const LineChart(
     this.data, {
+    this.useCursor = false,
+    this.onRelease,
     Duration swapAnimationDuration = const Duration(milliseconds: 150),
   }) : super(duration: swapAnimationDuration);
 
@@ -36,6 +40,60 @@ class LineChartState extends AnimatedWidgetBaseState<LineChart> {
   Widget build(BuildContext context) {
     final LineChartData showingData = _getDate();
     final LineTouchData touchData = showingData.lineTouchData;
+
+    if (widget.useCursor) {
+      return MouseRegion(
+          onEnter: (d) {
+            final Size chartSize = _getChartSize();
+            if (chartSize == null) {
+              return;
+            }
+
+            final LineTouchResponse response =
+                _touchHandler?.handleTouch(FlLongPressStart(d.localPosition), chartSize);
+            if (_canHandleTouch(response, touchData)) {
+              touchData.touchCallback(response);
+            }
+          },
+          onHover: (d) {
+            final Size chartSize = _getChartSize();
+            if (chartSize == null) {
+              return;
+            }
+
+            final LineTouchResponse response =
+                _touchHandler?.handleTouch(FlLongPressMoveUpdate(d.localPosition), chartSize);
+            if (_canHandleTouch(response, touchData)) {
+              touchData.touchCallback(response);
+            }
+          },
+          onExit: (d) {
+            final Size chartSize = _getChartSize();
+            if (chartSize == null) {
+              return;
+            }
+
+            final LineTouchResponse response =
+                _touchHandler?.handleTouch(FlLongPressEnd(d.localPosition), chartSize);
+            if (_canHandleTouch(response, touchData)) {
+              touchData.touchCallback(response);
+            }
+            if (widget.onRelease != null) {
+              widget.onRelease();
+            }
+          },
+          child: CustomPaint(
+            key: _chartKey,
+            size: getDefaultSize(context),
+            painter: LineChartPainter(
+                _withTouchedIndicators(_lineChartDataTween.evaluate(animation)),
+                _withTouchedIndicators(showingData), (touchHandler) {
+              setState(() {
+                _touchHandler = touchHandler;
+              });
+            }, textScale: MediaQuery.of(context).textScaleFactor),
+          ));
+    }
 
     return GestureDetector(
       onLongPressStart: (d) {
