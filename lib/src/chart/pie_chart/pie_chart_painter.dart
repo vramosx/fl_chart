@@ -91,7 +91,9 @@ class PieChartPainter extends BaseChartPainter<PieChartData> with TouchHandler<P
       tempAngle += sweepAngle;
     }
 
-    removeSectionsSpace(canvas, viewSize);
+    canvas.restore();
+
+    ///removeSectionsSpace(canvas, viewSize);
   }
 
   /// firstly the sections draw close to eachOther without any space,

@@ -8,9 +8,11 @@ import 'pie_chart_data.dart';
 
 class PieChart extends ImplicitlyAnimatedWidget {
   final PieChartData data;
+  final bool usePointer;
 
   const PieChart(
     this.data, {
+    this.usePointer = false,
     Duration swapAnimationDuration = const Duration(milliseconds: 150),
   }) : super(duration: swapAnimationDuration);
 
@@ -29,10 +31,73 @@ class PieChartState extends AnimatedWidgetBaseState<PieChart> {
   /// this is used to retrieve the chart size to handle the touches
   final GlobalKey _chartKey = GlobalKey();
 
+  Offset _globalToLocal(BuildContext context, Offset globalPosition) {
+    final RenderBox box = context.findRenderObject();
+    return box.globalToLocal(globalPosition);
+  }
+
   @override
   Widget build(BuildContext context) {
     final PieChartData showingData = _getDate();
     final PieTouchData touchData = showingData.pieTouchData;
+
+    if (widget.usePointer) {
+      return MouseRegion(
+        onEnter: (d) {
+          final Size chartSize = _getChartSize();
+          if (chartSize == null) {
+            return;
+          }
+
+          var pos = _globalToLocal(context, d.position);
+          final PieTouchResponse response =
+              _touchHandler?.handleTouch(FlLongPressStart(pos), chartSize);
+          if (_canHandleTouch(response, touchData)) {
+            touchData.touchCallback(response);
+          }
+        },
+        onHover: (d) {
+          final Size chartSize = _getChartSize();
+          if (chartSize == null) {
+            return;
+          }
+
+          var pos = _globalToLocal(context, d.position);
+          final PieTouchResponse response =
+              _touchHandler?.handleTouch(FlLongPressMoveUpdate(pos), chartSize);
+          if (_canHandleTouch(response, touchData)) {
+            touchData.touchCallback(response);
+          }
+        },
+        onExit: (d) {
+          final Size chartSize = _getChartSize();
+          if (chartSize == null) {
+            return;
+          }
+
+          var pos = _globalToLocal(context, d.position);
+          final PieTouchResponse response =
+              _touchHandler?.handleTouch(FlLongPressEnd(pos), chartSize);
+          if (_canHandleTouch(response, touchData)) {
+            touchData.touchCallback(response);
+          }
+        },
+        child: CustomPaint(
+          key: _chartKey,
+          size: getDefaultSize(context),
+          painter: PieChartPainter(
+            _pieChartDataTween.evaluate(animation),
+            showingData,
+            (touchHandler) {
+              setState(() {
+                _touchHandler = touchHandler;
+              });
+            },
+            textScale: MediaQuery.of(context).textScaleFactor,
+          ),
+        ),
+      );
+    }
 
     return GestureDetector(
       onLongPressStart: (d) {
